@@ -1,11 +1,12 @@
 import json
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required 
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Post
+from .models import User, Post, Follow
 
 
 def index(request):
@@ -68,7 +69,7 @@ def post(request):
     if request.method == "POST":
         data = json.loads(request.body)
         content = data.get("content")
-        post = Post(creator=request.user, content=content)
+        post = Post(author=request.user, content=content)
         post.save()
         return JsonResponse({"message": "Posted successfully"}, status=201)
 
@@ -79,9 +80,9 @@ def posts(request, id):
         try:
             post = Post.objects.get(id=id)
             if like:
-                post.likers.add(request.user)
+                post.likes.add(request.user)
             else:
-                post.likers.remove(request.user)
+                post.likes.remove(request.user)
             return JsonResponse({"message": "Post updated successfully"}, status=204)
         except IntegrityError:
             return JsonResponse({"message": "Post not found"}, status=404)
@@ -107,11 +108,15 @@ def profiles(request, id):
 
 def all_posts(request):
     posts = Post.objects.all().order_by("-date")
-    return JsonResponse([post.serialize() for post in posts], safe=False)
-
+    #return JsonResponse([post.toJson(request.user) for post in posts], safe=False)
+    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
+    
+@login_required
 def following_posts(request):
-    posts = Post.objects.filter(author=request.user.following).order_by("-date")
-    return JsonResponse([post.serialize() for post in posts], safe=False)
+    posts = Post.objects.filter(author__in=User.objects.filter(followers__in=Follow.objects.filter(follower=request.user))).order_by("-date")
+    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
+
+
 
   
             
