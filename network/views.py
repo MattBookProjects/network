@@ -109,9 +109,10 @@ def profiles(request, id):
 def all_posts(request):
     posts = Post.objects.all().order_by("-date")
     #return JsonResponse([post.toJson(request.user) for post in posts], safe=False)
+    #return JsonResponse({"post" : {"author": "author", "content": "content"}}, safe=False)
     return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
     
-@login_required
+@login_required(login_url="/login/")
 def following_posts(request):
     posts = Post.objects.filter(author__in=User.objects.filter(followers__in=Follow.objects.filter(follower=request.user))).order_by("-date")
     return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
