@@ -5,8 +5,14 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
+from django.middleware.csrf import get_token
 
 from .models import User, Post, Follow
+
+#LOGIN_URL = reverse('login')
+
+def csrf(request):
+    return JsonResponse({"token": get_token(request)})
 
 
 def index(request):
@@ -67,44 +73,91 @@ def register(request):
 
 def post(request):
     if request.method == "POST":
-        data = json.loads(request.body)
-        content = data.get("content")
-        post = Post(author=request.user, content=content)
-        post.save()
-        return JsonResponse({"message": "Posted successfully"}, status=201)
-
-def posts(request, id):
-    if request.method == "PUT":
-        data = json.loads(request.body)
-        like = data.get("like")
         try:
-            post = Post.objects.get(id=id)
-            if like:
-                post.likes.add(request.user)
-            else:
-                post.likes.remove(request.user)
-            return JsonResponse({"message": "Post updated successfully"}, status=204)
-        except IntegrityError:
-            return JsonResponse({"message": "Post not found"}, status=404)
-     
+            data = json.loads(request.body)
+            try:
+                content = data.get("content")
+            except:
+                return JsonResponse({"message": "Missing content parameter"}, status=400)
+            Post.objects.create(author=request.user, content=content)
+            return JsonResponse({"message": "Post created successfully"}, status=201)
+        except:
+            return HttpResponse(status=500)
     else:
-        return JsonResponse({"message": "Put method required"}, status=405)
+        return JsonResponse({"message": "POST method required"}, status=400)
+
+@login_required(login_url="/login/")
+def posts(request, id):
+    try:
+        post = Post.objects.get(id=id)
+    except:
+        return JsonResponse({"message": "Post not found"}, status=404)
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+        except:
+            return JsonResponse({"message": "Missing request body"}, status=400)
+        mode = data.get("mode")
+        if mode is None:
+            return JsonResponse({"message": "Missing mode parameter"}, status=400)
+        if mode == "like":
+            like = data.get("like")
+            if like is None:
+                return JsonResponse({"message": "Missing like parameter"}, status=400)
+            if like == True:
+                if post.likes.filter(id = request.user.id).count() > 0:
+                    return JsonResponse({"message": "You already like this post"}, status=409)
+                post.likes.add(request.user)
+                return HttpResponse(status=204)
+            if like == False: 
+                if post.likes.filter(id = request.user.id).count() == 0:
+                    return JsonResponse({"message": "You already don't like this post"}, status=409)
+                post.likes.remove(request.user)
+                return HttpResponse(status=204)
+            return JsonResponse({"message": "Invalid like parameter"}, status=400)            
+        if mode == "edit":
+            if post.author != request.user:
+                return JsonResponse({"message": "You can only edit your own posts"}, status=403)
+            content = data.get('content')
+            if content is None:
+                return JsonResponse({"message": "Missing content parameter"}, status=400)
+            post.content = content
+            post.save()
+            return HttpResponse(status=204)
+        return JsonResponse({"message": "Invalid mode parameter"}, status=400)   
+    return JsonResponse({"message": "PUT method required"}, status=400)
 
 def profiles(request, id):
     try:
         user = User.objects.get(id=id)
+    except:
+        return JsonResponse({"message": "Profile not found"}, status=404)
+    try:
         if request.method == "GET":
-            return JsonResponse(user.serialize(), safe=False)
-        elif request.method == "PUT":
-            data = json.loads(request.body)
+            return JsonResponse(user.serialize(request.user), safe=False, status=200)
+        if request.method == "PUT":
+            try:
+                data = json.loads(request.body)
+            except:
+                return JsonResponse({"message": "Missing request body"}, status=400)
             follow = data.get("follow")
-            if follow:
-                request.user.following.add(user)
-            else:
-                request.user.following.remove(user)
-            return JsonResponse({"message": "Profile updated successfully"}, status=204)
-    except IntegrityError:
-        return JsonResponse({"message": "User not found"}, status=404)
+            if follow is None:
+                return JsonResponse({"message": "Missing follow parameter"},status=400)
+            if follow == True:
+                if user.followers.filter(follower=request.user).count() > 0:
+                    return JsonResponse({"message": "You already follow this user"}, status=409)
+                Follow.objects.create(follower=request.user, followed=user)
+                return HttpResponse(status=204)        
+            if follow == False:
+                if user.followers.filter(follower=request.user).count() == 0:
+                    return JsonResponse({"message": "You already don't follow this user"}, status=409)
+                Follow.objects.get(follower=request.user, followed=user).delete()
+                return HttpResponse(status=204)
+            return JsonResponse({"message": "Invalid follow parameter"}, status=400)
+        return JsonResponse({"message": "Invalid request method"}, status=400)
+    except:
+        return HttpResponse(status=500)
+    
 
 def all_posts(request):
     posts = Post.objects.all().order_by("-date")

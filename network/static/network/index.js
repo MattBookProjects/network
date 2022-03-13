@@ -1,8 +1,14 @@
+async function getCsrfToken(){
+    let token = null;
+    await fetch("csrf").then(response => response.json()).then(data => {token = data.token});
+    return token;
+}
+
 function Post(props){
     return (
         <div>
-            <div>{props.author}</div>
-            <div>{props.content}</div>
+            <div onClick={() => props.app.setState({page: <ProfilePage id={props.post.author.id}/>})}>{props.post.author.username}</div>
+            <div>{props.post.content}</div>
         </div>
     );
 }
@@ -10,7 +16,7 @@ function Post(props){
 function Posts(props){
     return (
         <div>
-            {props.posts.map(post => <Post author={post.author.username} content={post.content}/>)}
+            {props.posts.map(post => <Post post={post} app={props.app}/>)}
         </div>
     );
 }
@@ -18,7 +24,7 @@ function Posts(props){
 class AllPosts extends React.Component{
     constructor(props){
         super(props);
-        this.state = { posts: undefined };
+        this.state = { posts: undefined, app: props.app };
     }
 
 
@@ -34,7 +40,7 @@ class AllPosts extends React.Component{
         }
         return (
             <div>
-                <Posts posts={this.state.posts}/>
+                <Posts posts={this.state.posts} app={this.state.app}/>
             </div>
         );
     }
@@ -43,7 +49,7 @@ class AllPosts extends React.Component{
 class FollowingPosts extends React.Component{
     constructor(props){
         super(props);
-        this.state = { posts: undefined };
+        this.state = { posts: undefined, app: props.app };
     }
 
 
@@ -59,7 +65,7 @@ class FollowingPosts extends React.Component{
         }
         return (
             <div>
-                <Posts posts={this.state.posts}/>
+                <Posts posts={this.state.posts} app={this.state.app}/>
             </div>
         );
     }
@@ -82,39 +88,58 @@ class ProfilePage extends React.Component {
     }
 
     componentWillMount(){
-        fetch(`profiles/${this.state.id}`).then(response => response.json()).then(data => {this.setState({ user: data})})
+        fetch(`profiles/${this.state.id}`).then(response => response.json()).then(data => {this.setState({ user: data})});
+    }
+
+    updateFollow(){
+        this.setState({ user.followed: this.state.user})
     }
 
     render(){
+        if (!this.state.user){
+            return (
+                <div>Loading</div>
+            );
+        }
         return (
             <div>
                 <UserInfo user={this.state.user}/>
+                <FollowButton followed={this.state.user.followed} id={this.state.id} page={this}/>
                 <Posts posts={this.state.user.posts}/>
             </div>
         )
     }
 }
 
-function Navbar(props){
-    return (
-        <div>
-            <button onClick={props.allPosts}>All Posts</button>
-            <button onClick={props.followingPosts}>Following Posts</button>
-            <a href="logout">Log out</a>
-        </div>
-    );
+function FollowButton(props){
+        console.log(props.followed);
+        return (
+            <button onClick={() => {
+                getCsrfToken().then(token => {
+                fetch(`profiles/${props.id}`,{
+                    method: "PUT",
+                    body: JSON.stringify({
+                        follow: !props.followed
+                    }),
+                    headers: {
+                        "X-CSRFToken": token
+                    }
 
+                });
+            }).then(() => props.page.updateFollow()
+            )}}>
+                {props.followed ? "Unfollow" : "Follow"}
+            </button>
+        );
 }
-
-
 
 
 class App extends React.Component {
     constructor(props){
         super(props);
-        this.state = {page: <AllPosts/>};
-        document.querySelector("#nav-all-posts").onclick = () => this.setState({page: <AllPosts/>});
-        document.querySelector("#nav-following-posts").onclick = () => this.setState({page: <FollowingPosts/>});
+        this.state = {page: <AllPosts app={this}/>};
+        document.querySelector("#nav-all-posts").onclick = () => this.setState({page: <AllPosts app={this}/>});
+        document.querySelector("#nav-following-posts").onclick = () => this.setState({page: <FollowingPosts app={this}/>});
     }
  
     render(){       

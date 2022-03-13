@@ -4,15 +4,27 @@ from django.db import models
 
 class User(AbstractUser):
     
-    def serialize(self, user):
-        return {
+    def serialize(self, request_user):
+        user = {
             "id": self.id,
             "username": self.username,
-            "own": self == user,
             "followers": self.followers.all().count(),
             "followings": self.followings.all().count(),
-            "followed": self.followers.filter(follower=user).count() > 0,
-            "posts": [post.serialize(user) for post in self.posts.all()]
+            "posts": [post.serialize(request_user) for post in self.posts.all()]
+            }
+        if request_user.is_authenticated:
+            meta = {
+                "authenticated": True,
+                "own": self == request_user,
+                "followed": self.followers.filter(follower=request_user).count() > 0
+                }
+        else:
+            meta = {
+                "authenticated": False
+            }
+        return {
+            "user": user,
+            "meta": meta
         }
    
 
@@ -23,17 +35,30 @@ class Post(models.Model):
     date = models.DateTimeField(auto_now_add=True)
 
 
-    def serialize(self, user):
-        return {
+    def serialize(self, request_user):
+        post = {
             "id": self.id,
             "author": {
                 "id": self.author.id,
                 "username": self.author.username
             },
             "content": self.content,
-            "owned": self.author == user,
-            "likes": self.likes.count(),
-            "liked": self.likes.filter(id=user.id).count() > 0
+            "likes": self.likes.count()
+        }
+
+        if request_user.is_authenticated:
+            meta = {
+                "authenticated": True,
+                "owned": self.author == request_user,
+                "liked": self.likes.filter(id=request_user.id).count() > 0
+            }
+        else:
+            meta = {
+                "authenticated": False
+            }
+        return {
+          "post": post,
+          "meta": meta
         }
 
 class Follow(models.Model):
