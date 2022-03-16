@@ -82,6 +82,7 @@ class ProfilesViewTestCase(ViewsTestCase):
 
     def test_profiles_view_invalid_method(self):
         user = User.objects.get(username="user1")
+        self.client.login(username="user1", password="password1")
         response = self.client.post(reverse("profiles", kwargs={"id": user.id}))
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Invalid request method"))
 
@@ -95,13 +96,70 @@ class ProfilesViewTestCase(ViewsTestCase):
         response = self.client.get(reverse("profiles", kwargs={"id": id}))
         self.assertEqual((response.status_code, response.json()["message"]), (404, "Profile not found"))
 
+    def test_follow_profile_not_authenticated(self):
+        user = User.objects.get(username="user1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}), {"follow": True}, content_type="application/json")
+        self.assertEqual((response.status_code, response.url), (302, f"{reverse('login')}/?next={reverse('profiles', kwargs={'id': user.id})}"))
+
+    def test_follow_profile_own(self):
+        user = User.objects.get(username="user1")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}))
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "You can't follow your own profile"))
+
+    def test_follow_profile_no_request_body(self):
+        user = User.objects.get(username="user2")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}))
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing request body"))
+
+    def test_follow_profile_no_follow_parameter(self):
+        user = User.objects.get(username="user2")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}), {"data": "value"}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing follow parameter"))
+
+    def test_follow_profile_invalid_follow_parameter(self):
+        user = User.objects.get(username="user2")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}), {"follow": "fdsfsdgs"}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "Invalid follow parameter"))
+
+    def test_follow_profile_correct(self):
+        user = User.objects.get(username="user2")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}), {"follow": True}, content_type="application/json")
+        self.assertEqual(response.status_code, 204)
+
+    def test_unfollow_profile_correct(self):
+        user1 = User.objects.get(username="user1")
+        user2 = User.objects.get(username="user2")
+        Follow.objects.create(follower=user1, followed=user2)
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user2.id}), {"follow": False}, content_type="application/json")
+        self.assertEqual(response.status_code, 204)
+
+    def test_follow_profile_already_followed(self):
+        user1 = User.objects.get(username="user1")
+        user2 = User.objects.get(username="user2")
+        Follow.objects.create(follower=user1, followed=user2)
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user2.id}), {"follow": True}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (409, "You already follow this profile"))
+    
+    def test_unfollow_profile_already_unfollowed(self):
+        user = User.objects.get(username="user2")
+        self.client.login(username="user1", password="password1")
+        response = self.client.put(reverse("profiles", kwargs={"id": user.id}), {"follow": False}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (409, "You already don't follow this profile"))
+
 class PostsViewTestCase(ViewsTestCase):
 
     def test_like_post_correct(self):
         user = User.objects.get(username="user1")
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like", "like": true}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like", "like": True}, content_type="application/json")
        # print(response.json()["message"])
         self.assertEqual(response.status_code, 204)
 
@@ -110,7 +168,7 @@ class PostsViewTestCase(ViewsTestCase):
         post = Post.objects.get(content="post2")
         post.likes.add(user)
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like", "like": false}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like", "like": False}, content_type="application/json")
         self.assertEqual(response.status_code, 204)
 
     def test_like_post_already_liked(self):
@@ -118,47 +176,47 @@ class PostsViewTestCase(ViewsTestCase):
         post = Post.objects.get(content="post2")
         post.likes.add(user)
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like", "like": true}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like", "like": True}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (409, "You already like this post"))
 
     def test_unlike_post_already_unliked(self):
         user = User.objects.get(username="user1")
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like", "like": false}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like", "like": False}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (409, "You already don't like this post"))
 
     def test_like_post_no_like_parameter(self):
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing like parameter"))
     
     def test_like_post_invalid_like_parameter(self):
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "like", "like": "sadgsfs"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "like", "like": "sadgsfs"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Invalid like parameter"))
 
     def test_edit_post_correct(self):
         user = User.objects.get(username="user1")
         post = Post.objects.get(author=user)
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "edit", "content": "newcontent1"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "edit", "content": "newcontent1"}, content_type="application/json")
         self.assertEqual(response.status_code, 204)
 
     def test_edit_post_not_owned(self):
         user = User.objects.get(username="user1")
         post = Post.objects.get(author=user)
         self.client.login(username="user2", password="password2")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "edit", "content": "newcontent1"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "edit", "content": "newcontent1"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (403, "You can only edit your own posts"))
 
     def test_edit_post_no_content_parameter(self):
         user = User.objects.get(username="user1")
         post = Post.objects.get(author=user)
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "edit"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "edit"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing content parameter"))
     
     def test_posts_view_no_request_body(self):
@@ -170,13 +228,13 @@ class PostsViewTestCase(ViewsTestCase):
     def test_posts_view_no_mode_parameter(self):
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"data": "value"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"data": "value"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing mode parameter"))
 
     def test_posts_view_invalid_mode_parameter(self):
         post = Post.objects.get(content="post2")
         self.client.login(username="user1", password="password1")
-        response = self.client.put(reverse("posts", kwargs={"id": post.id}), '{"mode": "fdjfk"}')
+        response = self.client.put(reverse("posts", kwargs={"id": post.id}), {"mode": "fdjfk"}, content_type="application/json")
         self.assertEqual((response.status_code, response.json()["message"]), (400, "Invalid mode parameter"))
 
     def test_posts_view_user_not_authenticated(self):
@@ -195,6 +253,33 @@ class PostsViewTestCase(ViewsTestCase):
         self.client.login(username="user1", password="password1")
         response = self.client.get(reverse("posts", kwargs={'id': post.id}))
         self.assertEqual((response.status_code, response.json()["message"]),(400, "PUT method required"))
+
+class PostViewTestCase(ViewsTestCase):
+
+    def test_post_view_user_not_authenticated(self):
+        response = self.client.post(reverse("post"))
+        self.assertEqual((response.status_code, response.url), (302, f"{reverse('login')}/?next={reverse('post')}"))
+
+    def test_post_view_invalid_method(self):
+        self.client.login(username="user1", password="password1")
+        response = self.client.get(reverse("post"))
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "POST method required"))
+    
+    def test_post_view_no_request_body(self):
+        self.client.login(username="user1", password="password1")
+        response = self.client.post(reverse("post"))
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing request body"))
+
+    def test_post_view_no_content_parameter(self):
+        self.client.login(username="user1", password="password1")
+        response = self.client.post(reverse("post"), {"data": "value"}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (400, "Missing content parameter"))
+
+    def test_post_view_correct(self):
+        self.client.login(username="user1", password="password1")
+        response = self.client.post(reverse("post"), {"content": "value"}, content_type="application/json")
+        self.assertEqual((response.status_code, response.json()["message"]), (201, "Post created successfully"))
+
     
 class ModelsTestCase(TestCase):
 
