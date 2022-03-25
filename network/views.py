@@ -179,6 +179,12 @@ def following_posts(request):
     except:
         return HttpResponse(status=500)
 
+def user_id(request):
+    id = None
+    if request.user.is_authenticated:
+        id = request.user.id
+    return JsonResponse({"id": id})
+
 
 
   

@@ -13,5 +13,6 @@ urlpatterns = [
     path("posts", views.all_posts, name="all_posts"),
     path("posts/following", views.following_posts, name="following_posts"),
     path("profiles/<int:id>", views.profiles, name="profiles"),
+    path("profiles/me", views.user_id, name="user_id"),
     path("csrf", views.csrf, name="csrf"),
 ]
