@@ -335,9 +335,11 @@ class ProfilePage extends React.Component {
             );
         }
         return (
-            <div>
+            <div className="profile-page">
                 <ProfileInfo user={this.state.user} meta={this.state.meta} followed ={this.state.meta.followed}/>
-                <Posts posts={this.state.user.posts} app={this.state.app}/>
+                <div className="profile-page-posts"> 
+                    <Posts posts={this.state.user.posts} app={this.state.app}/>
+                </div>
             </div>
         )
     }
@@ -357,14 +359,14 @@ class ProfileInfo extends React.Component {
                     </div>;
         if( this.state.meta.authenticated && !this.state.meta.own ) {
             return (
-                <div>
+                <div className="profile-page-info">
                     {ret}
                     <FollowButton followed={this.state.followed} id={this.state.id} page={this}/>
                 </div>
             );
         }
         return (
-            <div>
+            <div className="profile-page-info">
                 {ret}
             </div>
         );
@@ -396,8 +398,14 @@ class MyProfilePage extends React.Component {
   
 
 function FollowButton(props){
+        let className = "";
+        if ( props.followed ){
+            className = "follow-button-followed";
+        } else {
+            className = "follow-button-not-followed";
+        }
         return (
-            <button onClick={() => {
+            <button className={className} onClick={() => {
                 getCsrfToken().then(token => {
                 fetch(`profiles/${props.id}`,{
                     method: "PUT",
@@ -417,7 +425,7 @@ function FollowButton(props){
                         }
                     }
             })})}}>
-                {props.followed ? "Unfollow" : "Follow"}
+                {props.followed ? "Followed" : "Follow"}
             </button>
         );
 }

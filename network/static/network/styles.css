@@ -16,11 +16,23 @@ body {
     gap: 1rem;
 }
 
-.all-posts-page, .following-posts-page {
+.all-posts-page, .following-posts-page, .profile-page-posts {
     width: 50%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
+}
+
+.profile-page{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-page-info {
+    color: white;
+    font-size: 3rem;
 }
 
 .following-posts-page {
@@ -117,4 +129,25 @@ body {
     width: 5em;
     height: 3em;
     padding: 0.5rem;
+}
+
+.follow-button-not-followed {
+    border-radius: 10px;
+    border: 2px solid white;
+    background-color: #3030ff;
+}
+
+.follow-button-not-followed:hover{
+    background-color: #5050ff;
+}
+
+.follow-button-followed {
+    border-radius: 10px;
+    border: 2px solid white;
+    background-color: #202020;
+    color: white;
+}
+
+.follow-button-followed:hover{
+    background-color: #404040;
 }
