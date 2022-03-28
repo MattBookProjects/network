@@ -1,5 +1,5 @@
 body {
-    background-color: #6f006f;
+    background-color: #303030;
 }
 
 .app {
@@ -16,54 +16,86 @@ body {
     gap: 1rem;
 }
 
-.all-posts-page {
+.all-posts-page, .following-posts-page {
     width: 50%;
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
+.following-posts-page {
+    margin-top: 1rem;
+}
+
+.post {
+    display: flex;
+    flex-direction: column;
+}
+
 .post-form {
     width: 100%;
     display: flex;
     flex-direction: column;
+    margin-top: 1rem;
 }
 
 .post-form-content {
     min-height: 200px;
     padding: 0.5rem;
+    border-radius: 10px;
 }
 
 .post-author {
-    background-color: #dfdfdf;
-    color: blue;
+    color: #7f7fff;
+    font-weight: bold;
+    justify-self: flex-start;
+    align-self: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+    
+}
+
+.post-author:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.post-author-area {
+    background-color: #282828;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     padding: 0.5rem;
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
+    min-height: 4em;
+    
 }
 
-.post-like-area {
+.post-likes-area {
     display: flex;
-    flex-direction: column;
-    background-color: #dfdfdf;
-    align-items: flex-end;
-    gap: 0.5rem;
+    flex-direction: row;
+    background-color: #282828;
+    justify-content: flex-end;
     padding: 0.5rem;
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
+    color: white;
 }
 
 .post-content {
-    background-color: white;
+    background-color: #202020;
     padding: 0.5rem;
     min-height: 200px;
+    color: white;
 }
 
 
 
 .post-form-button {
     align-self: flex-end;
-    background-color:blue;
+    background-color: #3030ff;
     color: white;
     width: 5em;
     height: 3em;
@@ -71,7 +103,16 @@ body {
 }
 
 .like-button {
-    background-color:blue;
+    background-color: blue;
+    color: white;
+    width: 5em;
+    height: 3em;
+    padding: 0.5rem;
+    align-self: flex-end;
+}
+
+.edit-post-button {
+    background-color: #3030ff;
     color: white;
     width: 5em;
     height: 3em;

@@ -40,7 +40,7 @@ class PostForm extends React.Component {
     render(){
         return (
             <div className="post-form">
-                <textarea className="post-form-content" type="text" value={this.state.content} onChange={this.handleChange}/>
+                <textarea className="post-form-content" type="text" value={this.state.content} onChange={this.handleChange} placeholder="What's up buddy?"/>
                 <button className="post-form-button" onClick={this.handleSubmit}>Post</button>
             </div>
         );
@@ -172,45 +172,35 @@ class Post extends React.Component {
 
 
     render(){
-        let likeArea = 
-            <div className="post-like-area">
-                <div>
-                    Likes: {this.state.likes}
-                </div>
-            </div>
-        const ret = 
-            <div className="post-area">
+        let authorArea = 
+            <div className="post-author-area">
                 <div className="post-author" onClick={() => this.state.app.setState({page: <ProfilePage id={this.state.post.author.id} app={this.state.app} />})}>{this.state.post.author.username}</div>
+             </div>   
+        const mainArea = 
+            <div>
                 <div className="post-content">{this.state.content}</div>
+                <div className="post-likes-area">Likes: {this.state.likes}</div>
             </div>;
         if (this.state.meta.authenticated){
-            likeArea = 
-                <div className="post-like-area">
-                    <div>
-                        Likes: {this.state.likes}
-                    </div>
-                    <LikeButton id={this.state.post.id} post={this} liked={this.state.liked}/>
-                </div>
             if (this.state.meta.owned){
-                return (
-                    <div>
-                        {ret}
-                        {likeArea}                 
+                authorArea = 
+                    <div className="post-author-area">
+                        <div className="post-author" onClick={() => this.state.app.setState({page: <ProfilePage id={this.state.post.author.id} app={this.state.app} />})}>{this.state.post.author.username}</div>
                         <EditButton field={this.state.field}/>
-                    </div>
-                );
+                    </div>   
             }
             return (
                 <div className="post">
-                    {ret}
-                    {likeArea}
+                    {authorArea}
+                    {mainArea}
+                    <LikeButton id={this.state.post.id} post={this} liked={this.state.liked}/>
                 </div>
             );
         }
         return (
-            <div>
-                {ret}
-                {likeArea}
+            <div className="post">
+                {authorArea}
+                {mainArea}
             </div>
         );
     }
@@ -242,7 +232,7 @@ class PostField extends React.Component {
 
     render(){
         return (
-            <div className="post">
+            <div>
                 {this.state.page}
             </div>
         )
@@ -314,7 +304,7 @@ class FollowingPosts extends React.Component{
             )
         }
         return (
-            <div>
+            <div className="following-posts-page">
                 <Posts posts={this.state.posts} app={this.state.app}/>
             </div>
         );
@@ -463,7 +453,7 @@ function LikeButton(props) {
 
 function EditButton(props) {
     return(
-        <button onClick = {() => {
+        <button className="edit-post-button" onClick = {() => {
             props.field.setEdit();
         }}>Edit</button>
     );
