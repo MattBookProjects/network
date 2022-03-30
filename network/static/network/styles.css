@@ -31,8 +31,29 @@ body {
 }
 
 .profile-page-info {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 2fr 1fr 1fr;
+    width: 60%;
+    min-height: 500px;
+    align-items: center;
+    justify-items: center;
+}
+
+.profile-page-username{
+    font-size: 4rem;
+    font-weight: bold;
     color: white;
-    font-size: 3rem;
+}
+
+.profile-page-follow-area{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    font-size: 2rem;
+    align-items: center;
+    justify-items: center;
+    color: white;
 }
 
 .following-posts-page {
@@ -114,13 +135,56 @@ body {
     padding: 0.5rem;
 }
 
+@keyframes like {
+     0% {
+         width: 75%;
+         height: 75%;
+         font-size: 1em;
+     }
+
+     50% {
+         width: 100%;
+         height: 100%;
+         font-size: 1.5em;
+     }
+
+     100% {
+         width: 75%;
+         height: 75%;
+         font-size: 1em;
+     }
+
+    
+}
+
+.like-button-liked{
+    background-color: #6030ff;
+}
+
+.like-button-not-liked{
+    background-color: #503050;
+}
+
 .like-button {
-    background-color: blue;
     color: white;
-    width: 5em;
-    height: 3em;
+    width: 75%;
+    height: 75%;
     padding: 0.5rem;
+    animation-name: like;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    animation-play-state: paused;
+}
+
+.like-button-container {
+    width: 7em;
+    height: 4em;
     align-self: flex-end;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-start;
+
 }
 
 .edit-post-button {
@@ -128,6 +192,12 @@ body {
     color: white;
     width: 5em;
     height: 3em;
+    padding: 0.5rem;
+}
+
+.follow-button {
+    font-size: 1.5rem;
+    min-width: 9em;
     padding: 0.5rem;
 }
 
@@ -150,4 +220,23 @@ body {
 
 .follow-button-followed:hover{
     background-color: #404040;
+}
+
+.edit-post-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-post-form-buttons-container{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.edit-post-form-cancel-button {
+    padding: 0.5rem;
+    color: white;
+    background-color: #803030;
+    height: 3em;
+    width: 5em;
 }

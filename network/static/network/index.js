@@ -120,10 +120,12 @@ class EditPostForm extends React.Component {
 
     render(){
         return (
-            <div>
-                <textarea type="text" value={this.state.content} onChange={this.handleChange}/>
-                <button onClick={this.handleSave}>Save</button>
-                <button onClick={this.handleCancel}>Cancel</button>
+            <div className="edit-post-form">
+                <textarea className="post-form-content" type="text" value={this.state.content} onChange={this.handleChange}/>
+                <div className="edit-post-form-buttons-container">
+                    <button className="post-form-button" onClick={this.handleSave}>Save</button>
+                    <button className="edit-post-form-cancel-button" onClick={this.handleCancel}>Cancel</button>
+                </div>
             </div>
 
         )
@@ -352,22 +354,25 @@ class ProfileInfo extends React.Component {
     }
 
     render() {
-        const ret =  <div>
-                        <div>username: {this.state.username}</div>
-                        <div>following: {this.state.followings}</div>
-                        <div>followers: {this.state.followers}</div>
-                    </div>;
+        const usernameArea = <div className="profile-page-username">{this.state.username}</div>
+        const followArea =  <div className="profile-page-follow-area">
+                                <div>FOLLOWING: {this.state.followings}</div>
+                                <div>FOLLOWERS: {this.state.followers}</div>
+                            </div>
+        
         if( this.state.meta.authenticated && !this.state.meta.own ) {
             return (
                 <div className="profile-page-info">
-                    {ret}
+                    {usernameArea}
+                    {followArea}
                     <FollowButton followed={this.state.followed} id={this.state.id} page={this}/>
                 </div>
             );
         }
         return (
             <div className="profile-page-info">
-                {ret}
+                {usernameArea}
+                {followArea}
             </div>
         );
     }
@@ -405,7 +410,7 @@ function FollowButton(props){
             className = "follow-button-not-followed";
         }
         return (
-            <button className={className} onClick={() => {
+            <button className={"follow-button " + className} onClick={() => {
                 getCsrfToken().then(token => {
                 fetch(`profiles/${props.id}`,{
                     method: "PUT",
@@ -431,8 +436,20 @@ function FollowButton(props){
 }
 
 function LikeButton(props) {
-    return (
-        <button className="like-button" onClick = {() => { 
+
+    function triggerAnimation(button){
+        button.style.animationPlayState = "running";
+        setTimeout(() => {button.style.animationPlayState = "paused"}, 2000);
+    }
+    let className = "like-button";
+    if ( props.liked ){
+        className += " like-button-liked";
+    } else {
+        className += " like-button-not-liked";
+    }
+
+    const button =  <button className={className} onClick={
+        (event) => { 
             getCsrfToken().then(token => {
             fetch(`posts/${props.id}`, {
                 method: "PUT",
@@ -449,13 +466,20 @@ function LikeButton(props) {
                         props.post.setState({likes: props.post.state.likes - 1, liked: false});
                     } else {
                         props.post.setState({likes: props.post.state.likes + 1, liked: true});
+                        triggerAnimation(event.target);
                     }
                 }
             })
             })
-        }}>
-            {props.liked ? "Unlike" : "Like"}
-        </button>
+        }
+    }>
+        {props.liked ? "Liked" : "Like"}
+    </button>;
+    
+    return (
+        <div className="like-button-container">
+           {button}
+        </div>
     );
 }
 
