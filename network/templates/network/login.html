@@ -1,24 +1,27 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+    <div class="login-page-container">
+        <div class="login-page">
+            <div class="login-form-label">Login</div>
 
-    <h2>Login</h2>
-
-    {% if message %}
-        <div>{{ message }}</div>
-    {% endif %}
-
-    <form action="{% url 'login' %}" method="post">
-        {% csrf_token %}
-        <div class="form-group">
-            <input autofocus class="form-control" type="text" name="username" placeholder="Username">
+            {% if message %}
+                <div class="login-form-message">{{ message }}</div>
+            {% endif %}
+        
+            <form class="login-form" action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input autofocus class="login-form-input" type="text" name="username" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <input class="login-form-input" type="password" name="password" placeholder="Password">
+                </div>
+                <input class="login-form-button" type="submit" value="Login">
+            </form>
+            <div class="login-form-register">
+                Don't have an account? <a class="login-form-register-link" href="{% url 'register' %}">Register here.</a>
+            </div>
         </div>
-        <div class="form-group">
-            <input class="form-control" type="password" name="password" placeholder="Password">
-        </div>
-        <input class="btn btn-primary" type="submit" value="Login">
-    </form>
-
-    Don't have an account? <a href="{% url 'register' %}">Register here.</a>
-
+    </div>
 {% endblock %}

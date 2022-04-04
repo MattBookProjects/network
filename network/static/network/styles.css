@@ -14,6 +14,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    margin-top: 1rem;
 }
 
 .all-posts-page, .following-posts-page, .profile-page-posts {
@@ -103,6 +104,7 @@ body {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     min-height: 4em;
+    align-items: center;
     
 }
 
@@ -133,6 +135,11 @@ body {
     width: 5em;
     height: 3em;
     padding: 0.5rem;
+    font-size: 1rem;
+}
+
+.button:hover{
+    cursor: pointer;
 }
 
 @keyframes like {
@@ -193,6 +200,7 @@ body {
     width: 5em;
     height: 3em;
     padding: 0.5rem;
+    font-size: 1rem;
 }
 
 .follow-button {
@@ -231,6 +239,7 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    align-items: center;
 }
 
 .edit-post-form-cancel-button {
@@ -239,4 +248,85 @@ body {
     background-color: #803030;
     height: 3em;
     width: 5em;
+    font-size: 1rem;
+}
+
+.navbar{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 2.5rem; 
+}
+
+.nav-item, .nav-link, .navbar-brand {
+    font-size: 2rem;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-item{
+    padding: 0.5rem;
+}
+
+.nav-item:hover{
+    background-color: #383838;
+    cursor: pointer;
+}
+
+.login-page-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10rem;
+    width: 50%;
+    gap: 1rem;
+} 
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+}
+
+.login-form-input {
+    width: 100%;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    box-sizing: border-box;
+}
+
+.login-form-button {
+    align-self: flex-end;
+    font-size: 1rem;
+    padding: 0.5rem;
+    width: 6em;
+    height: 3em;
+    background-color: #3030ff;
+    color: white;
+}
+
+.login-form-label{
+    font-size: 3rem;
+    color: white;
+    font-weight: bold;
+}
+
+.login-form-message {
+    color: red;
+}
+
+.login-form-register{
+    color: white;
+    align-self: flex-end;
+}
+
+.login-form-register-link{
+    color: yellow;
 }

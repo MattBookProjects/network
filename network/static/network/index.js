@@ -41,7 +41,7 @@ class PostForm extends React.Component {
         return (
             <div className="post-form">
                 <textarea className="post-form-content" type="text" value={this.state.content} onChange={this.handleChange} placeholder="What's up buddy?"/>
-                <button className="post-form-button" onClick={this.handleSubmit}>Post</button>
+                <button className="button post-form-button" onClick={this.handleSubmit}>Post</button>
             </div>
         );
     }
@@ -123,8 +123,8 @@ class EditPostForm extends React.Component {
             <div className="edit-post-form">
                 <textarea className="post-form-content" type="text" value={this.state.content} onChange={this.handleChange}/>
                 <div className="edit-post-form-buttons-container">
-                    <button className="post-form-button" onClick={this.handleSave}>Save</button>
-                    <button className="edit-post-form-cancel-button" onClick={this.handleCancel}>Cancel</button>
+                    <button className="button post-form-button" onClick={this.handleSave}>Save</button>
+                    <button className="button edit-post-form-cancel-button" onClick={this.handleCancel}>Cancel</button>
                 </div>
             </div>
 
@@ -274,7 +274,7 @@ class AllPosts extends React.Component{
 
         if( this.state.id === null){
             return ( 
-                <div>
+                <div className="all-posts-page">
                      <Posts posts={this.state.posts} app={this.state.app}/>
                 </div>
             );
@@ -405,9 +405,9 @@ class MyProfilePage extends React.Component {
 function FollowButton(props){
         let className = "";
         if ( props.followed ){
-            className = "follow-button-followed";
+            className = "button follow-button-followed";
         } else {
-            className = "follow-button-not-followed";
+            className = "button follow-button-not-followed";
         }
         return (
             <button className={"follow-button " + className} onClick={() => {
@@ -441,7 +441,7 @@ function LikeButton(props) {
         button.style.animationPlayState = "running";
         setTimeout(() => {button.style.animationPlayState = "paused"}, 2000);
     }
-    let className = "like-button";
+    let className = "button like-button";
     if ( props.liked ){
         className += " like-button-liked";
     } else {
@@ -485,7 +485,7 @@ function LikeButton(props) {
 
 function EditButton(props) {
     return(
-        <button className="edit-post-button" onClick = {() => {
+        <button className="button edit-post-button" onClick = {() => {
             props.field.setEdit();
         }}>Edit</button>
     );
