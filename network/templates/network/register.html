@@ -1,32 +1,32 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <div class="login-page-container">
-        <div class="login-page">
-            <div class="login-form-label">Register</div>
+    <div class="entry-page-container">
+        <div class="entry-page">
+            <div class="entry-page-label">Register</div>
 
             {% if message %}
-                <div class="login-form-message">{{ message }}</div>
+                <div class="entry-page-message">{{ message }}</div>
             {% endif %}
 
-            <form class="login-form" action="{% url 'register' %}" method="post">
+            <form class="entry-form" action="{% url 'register' %}" method="post">
                 {% csrf_token %}
-                <div class="form-group">
-                    <input class="login-form-input" autofocus type="text" name="username" placeholder="Username">
+                <div>
+                    <input class="entry-form-input" autofocus type="text" name="username" placeholder="Username">
                 </div>
-                <div class="form-group">
-                    <input class="login-form-input" type="text" name="password" placeholderemail" name="email" placeholder="Email Address">
+                <div>
+                    <input class="entry-form-input" type="text" name="password" placeholderemail" name="email" placeholder="Email Address">
                 </div>
-                <div class="form-group">
-                    <input class="login-form-input" type="password" name="password" placeholder="Password">
+                <div>
+                    <input class="entry-form-input" type="password" name="password" placeholder="Password">
                 </div>
-                <div class="form-group">
-                    <input class="login-form-input" type="password" name="confirmation" placeholder="Confirm Password">
+                <div>
+                    <input class="entry-form-input" type="password" name="confirmation" placeholder="Confirm Password">
                 </div>
-                <input class="login-form-button" type="submit" value="Register">
+                <input class="entry-form-button" type="submit" value="Register">
             </form>
-            <div class="login-form-register">
-                Already have an account? <a class="login-form-register-link" href="{% url 'login' %}">Log In here.</a>
+            <div class="entry-page-link-container">
+                Already have an account? <a class="entry-page-link" href="{% url 'login' %}">Log In here.</a>
             </div>
         </div>
     </div>

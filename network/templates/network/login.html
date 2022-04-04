@@ -1,26 +1,26 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
-    <div class="login-page-container">
-        <div class="login-page">
-            <div class="login-form-label">Login</div>
+    <div class="entry-page-container">
+        <div class="entry-page">
+            <div class="entry-page-label">Login</div>
 
             {% if message %}
-                <div class="login-form-message">{{ message }}</div>
+                <div class="entry-page-message">{{ message }}</div>
             {% endif %}
         
-            <form class="login-form" action="{% url 'login' %}" method="post">
+            <form class="entry-form" action="{% url 'login' %}" method="post">
                 {% csrf_token %}
-                <div class="form-group">
-                    <input autofocus class="login-form-input" type="text" name="username" placeholder="Username">
+                <div>
+                    <input autofocus class="entry-form-input" type="text" name="username" placeholder="Username">
                 </div>
-                <div class="form-group">
-                    <input class="login-form-input" type="password" name="password" placeholder="Password">
+                <div>
+                    <input class="entry-form-input" type="password" name="password" placeholder="Password">
                 </div>
-                <input class="login-form-button" type="submit" value="Login">
+                <input class="entry-form-button" type="submit" value="Login">
             </form>
-            <div class="login-form-register">
-                Don't have an account? <a class="login-form-register-link" href="{% url 'register' %}">Register here.</a>
+            <div class="entry-page-link-container">
+                Don't have an account? <a class="entry-page-link" href="{% url 'register' %}">Register here.</a>
             </div>
         </div>
     </div>
